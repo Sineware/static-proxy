@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <title>Error | Sineware Static Proxy</title>
+    <script>
+      window.onload = function() {
+        document.getElementById("window_location").innerHTML = window.location.href;
+      }
+    </script>
+  </head>
+  <body>
+    <main class="container">
+      <h1>An error occurred processing this request.</h1>
+      <p>You may notify this sites administrator that the following error occurred: <br /><code>"<%= error_message %>" for <span id="window_location">unknown</span></code></p>
+      <hr />
+      <i>powered by <a href="https://github.com/Sineware/static-proxy">Sineware Static Proxy</a> | AGPL v3 Licensed</i>
+    </main>
+  </body>
+</html>

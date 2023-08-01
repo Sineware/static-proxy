@@ -1,0 +1,1 @@
+A simple WordPress plugin to call the refresh endpoint on any change.
