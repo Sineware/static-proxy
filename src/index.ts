@@ -20,15 +20,17 @@ import axios from 'axios';
 import Express from 'express';
 import { glob } from 'glob';
 import * as fs from 'node:fs';
+
 import { upstream, upstreamPostUrl, hostUrl, port, apiKey, whitelistPaths, blacklistPaths } from "./consts";
 import { fetchFile } from './fetchFile';
 
 console.log(`- Sineware Static Proxy -
     Upstream: ${upstream}
+    Upstream Post URL: ${upstreamPostUrl === "" ? "None" : upstreamPostUrl}
     Host: ${hostUrl}
     Port: ${port}
-    Whitelist: ${whitelistPaths}
-    Blacklist: ${blacklistPaths}
+    Whitelist: ${JSON.stringify(whitelistPaths)}
+    Blacklist: ${JSON.stringify(blacklistPaths)}
 `);
 
 async function main() {
@@ -36,14 +38,15 @@ async function main() {
     const app = Express();
     app.set('view engine', 'ejs');
 
-    app.use(async (req, res, next) => {
+    app.use(require('morgan')('dev'));
+    app.use(async (req: any, res, next) => {
         res.setHeader("X-Powered-By", "Sineware Cloud");
         next();
     });
     app.use(async (req, res, next) => {
         // if the path contains a blacklisted path, return a 404
         for(let path of blacklistPaths) {
-            if(req.path.startsWith(path)) {
+            if(req.path.includes(path) || decodeURI(req.path).includes(path)) {
                 res.status(404).render("http-error", {
                     error_message: "Blacklisted Path",
                 });
@@ -54,7 +57,7 @@ async function main() {
         if(whitelistPaths.length > 0) {
             let found = false;
             for(let path of whitelistPaths) {
-                if(req.path.startsWith(path)) {
+                if(req.path.includes(path) || decodeURI(req.path).includes(path)) {
                     found = true;
                     break;
                 }
@@ -71,10 +74,13 @@ async function main() {
     app.use(Express.json());
     app.use(Express.urlencoded({ extended: true }));
 
-    app.get('/sw-api/refresh', async (req, res) => {
+    app.post('/sw-api/refresh', async (req, res) => {
         // bearer token auth
         if(req.header("Authorization") != `Bearer ${apiKey}`) {
-            res.status(403).send("Invalid API key");
+            res.status(403).send(JSON.stringify({
+                "status": false,
+                "message": "Invalid API key"
+            }));
             return;
         }
         let files = await glob("./public/**/*", {nodir: true});
@@ -90,7 +96,10 @@ async function main() {
                 console.log(e.message);
             }
         }
-        res.send(count + " OK");
+        res.send(JSON.stringify({
+            "status": true,
+            "message": count + " OK"
+        }));
     });
 
     app.get('*', async (req, res) => {    
@@ -100,7 +109,7 @@ async function main() {
             path += "index.html";
         }
         let filePath = `./public${path}`;
-        console.log(filePath);
+        //console.log(filePath);
         if (fs.existsSync(filePath)) {
             res.sendFile(filePath, {root: process.cwd()});
         } else {
