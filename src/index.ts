@@ -21,11 +21,12 @@ import Express from 'express';
 import { glob } from 'glob';
 import * as fs from 'node:fs';
 
-import { upstream, upstreamPostUrl, hostUrl, port, apiKey, whitelistPaths, blacklistPaths } from "./consts";
+import { upstream, upstreamInternalUrl, upstreamPostUrl, hostUrl, port, apiKey, whitelistPaths, blacklistPaths } from "./consts";
 import { fetchFile } from './fetchFile';
 
 console.log(`- Sineware Static Proxy -
     Upstream: ${upstream}
+    Upstream Internal URL: ${upstreamInternalUrl === "" ? "None" : upstreamInternalUrl}
     Upstream Post URL: ${upstreamPostUrl === "" ? "None" : upstreamPostUrl}
     Host: ${hostUrl}
     Port: ${port}
@@ -37,8 +38,9 @@ async function main() {
     console.log("Starting server...");
     const app = Express();
     app.set('view engine', 'ejs');
+    app.set('trust proxy', true);
 
-    app.use(require('morgan')('dev'));
+    app.use(require('morgan')('combined'));
     app.use(async (req: any, res, next) => {
         res.setHeader("X-Powered-By", "Sineware Cloud");
         next();
@@ -48,6 +50,8 @@ async function main() {
         for(let path of blacklistPaths) {
             if(req.path.includes(path) || decodeURI(req.path).includes(path)) {
                 res.status(404).render("http-error", {
+                    http_code: "404",
+                    http_message: "Not Found",
                     error_message: "Blacklisted Path",
                 });
                 return;
@@ -64,6 +68,8 @@ async function main() {
             }
             if(!found) {
                 res.status(404).render("http-error", {
+                    http_code: "404",
+                    http_message: "Not Found",
                     error_message: "Path not whitelisted",
                 });
                 return;
@@ -120,7 +126,9 @@ async function main() {
             } catch(e: any) {
                 console.log("Error fetching from upstream");
                 console.log(e.message);
-                res.status(500).render("http-error", {
+                res.status(404).render("http-error", {
+                    http_code: "404",
+                    http_message: "Not Found",
                     error_message: e.message,
                 });
             }
@@ -142,11 +150,15 @@ async function main() {
                 console.log("Error posting to upstream");
                 console.log(e.message);
                 res.status(500).render("http-error", {
+                    http_code: "500",
+                    http_message: "Internal Server Error",
                     error_message: e.message,
                 });
             }
         } else {
             res.status(500).render("http-error", {
+                http_code: "500",
+                http_message: "Internal Server Error",
                 error_message: "No upstream post url specified",
             });
         }

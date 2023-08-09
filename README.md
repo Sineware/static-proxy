@@ -7,6 +7,7 @@ Secure dynamic backends such as Wordpress from direct attacks with a controlled 
 ```bash
 API_KEY=abc123 # API Key to access /sw-api/refresh endpoint (Authorization header with "Bearer <token>")
 UPSTREAM_URL="https://sineware.ca" # Backend service URL
+UPSTREAM_INTERNAL_URL="" # Specifiy if Static Proxy should access the upstream service from a different URL (ex. bypass a load balancer)
 UPSTREAM_POST_URL="" # URL to send POST JSON requests
 
 HOST_URL="http://localhost:3000" # URL the static server is hosted on

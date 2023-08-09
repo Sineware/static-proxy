@@ -12,11 +12,20 @@
     </script>
   </head>
   <body>
-    <main class="container">
-      <h1>An error occurred processing this request.</h1>
-      <p>You may notify this sites administrator that the following error occurred: <br /><code>"<%= error_message %>" for <span id="window_location">unknown</span></code></p>
-      <hr />
-      <i>powered by <a href="https://github.com/Sineware/static-proxy">Sineware Static Proxy</a> | AGPL v3 Licensed</i>
+    <main class="container">      
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+        <b>- <%= http_code %> -</b>
+        <p><%= http_message %></p>
+      </div>
+      <div style="position:absolute; bottom: 1%; left: 1%;">
+        <details>
+          <summary>Details</summary>
+          <hr />
+          <b>An error occurred processing this request.</b>
+          <p><code>"<%= error_message %>" for <span id="window_location">unknown</span></code></p>
+          <i>powered by <a href="https://github.com/Sineware/static-proxy">Sineware Static Proxy</a> | AGPL v3 Licensed</i>
+        </details>
+      </div>
     </main>
   </body>
 </html>
