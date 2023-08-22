@@ -8,7 +8,7 @@ Secure dynamic backends such as Wordpress from direct attacks with a controlled 
 ## Environement
 ```bash
 API_KEY=abc123 # API Key to access /sw-api/refresh endpoint (Authorization header with "Bearer <token>")
-UPSTREAM_URL="https://sineware.ca" # Backend service URL
+UPSTREAM_URL="https://sineware.ca" # Backend service public/application configured URL
 UPSTREAM_INTERNAL_URL="" # Specifiy if Static Proxy should access the upstream service from a different URL (ex. bypass a load balancer)
 UPSTREAM_POST_URL="" # URL to send POST JSON requests
 
@@ -19,7 +19,7 @@ BLACKLIST_PATHS="/wp-admin,/wp-login,/xmlrpc" # route paths that are not allowed
 ```
 
 ## Handling POST requests
-All POST requests (URL-encoded and body) are captured (and never pass through) and redirected as JSON to the endpoint set by the UPSTREAM_POST_URL env. Otherwise, POST requests are ignored.
+All POST requests (URL-encoded and body) are captured (and never passed through) and redirected as JSON to the endpoint set by the UPSTREAM_POST_URL env. Otherwise, POST requests are ignored.
 
 ## Refreshing Static Copy
 Once the server has downloaded the contents of the upstream server for a given request, it will continue to serve those files without hitting the upstream. 
