@@ -20,6 +20,8 @@ import axios from 'axios';
 import Express from 'express';
 import { glob } from 'glob';
 import * as fs from 'node:fs';
+import compression from 'compression';
+import cors from 'cors';
 
 import { upstream, upstreamInternalUrl, upstreamPostUrl, hostUrl, port, apiKey, whitelistPaths, blacklistPaths } from "./consts";
 import { fetchFile } from './fetchFile';
@@ -79,8 +81,11 @@ async function main() {
     });
     app.use(Express.json());
     app.use(Express.urlencoded({ extended: true }));
+    app.use(compression());
+    app.use(cors());
 
     app.post('/sw-api/refresh', async (req, res) => {
+        console.log("Refresh request from " + req.ip + " " + req.header("User-Agent"));
         // bearer token auth
         if(req.header("Authorization") != `Bearer ${apiKey}`) {
             res.status(403).send(JSON.stringify({
@@ -104,7 +109,8 @@ async function main() {
         }
         res.send(JSON.stringify({
             "status": true,
-            "message": count + " OK"
+            "message": count + " OK",
+            "files": files,
         }));
     });
 

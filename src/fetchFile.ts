@@ -10,14 +10,22 @@ export async function htmlUrlRewriter(html: string) {
         result = result.replace(new RegExp("http://", 'g'), "https://");
     }
     result = result.replace(new RegExp(upstream, 'g'), hostUrl);
+    result = result.replace(new RegExp(upstream.replace(/^https?:\/\//, ''), 'g'), hostUrl.replace(/^https?:\/\//, ''));
+    
     return result;
 }
 export async function fetchFile(path: string) {
     try {
         let filePath = `./public${path}`;
-        console.log("Fetching from upstream...");
-        console.log(`${upstream}${path}`);
-        let contents = await axios.get(`${upstreamInternalUrl == "" ? upstream : upstreamInternalUrl}${path.endsWith("index.html") ? path.replace("index.html", "") : path}`, {responseType: 'arraybuffer'});
+        console.log(`Fetching from upstream: ${upstream}${path}`);
+        let contents = await axios.get(`${upstreamInternalUrl == "" ? upstream : upstreamInternalUrl}${path.endsWith("index.html") ? path.replace("index.html", "") : path}`, 
+            {
+                responseType: 'arraybuffer', 
+                headers: {
+                    "Host": upstream.replace(/^https?:\/\//, ''),
+                }
+            }
+        );
         fs.mkdirSync(nodepath.dirname(filePath), {recursive: true});
         if(isBinaryFile(contents.data)) {
             fs.writeFileSync(filePath, contents.data);
