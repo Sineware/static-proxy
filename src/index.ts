@@ -20,6 +20,7 @@ import axios from 'axios';
 import Express from 'express';
 import { glob } from 'glob';
 import * as fs from 'node:fs';
+import * as nodePath from 'node:path';
 import compression from 'compression';
 import cors from 'cors';
 
@@ -44,40 +45,51 @@ async function main() {
 
     app.use(require('morgan')('combined'));
     app.use(async (req: any, res, next) => {
-        res.setHeader("X-Powered-By", "Sineware Cloud");
+        res.setHeader("X-Powered-By", "Sineware Static Proxy");
         next();
     });
     app.use(async (req, res, next) => {
-        // if the path contains a blacklisted path, return a 404
-        for(let path of blacklistPaths) {
-            if(req.path.includes(path) || decodeURI(req.path).includes(path)) {
-                res.status(404).render("http-error", {
-                    http_code: "404",
-                    http_message: "Not Found",
-                    error_message: "Blacklisted Path",
-                });
-                return;
-            }
-        }
-        // if the whitelist is not empty and the path doesn't contain a whitelisted path, return a 404
-        if(whitelistPaths.length > 0) {
-            let found = false;
-            for(let path of whitelistPaths) {
+        try {
+            // if the path contains a blacklisted path, return a 404
+            for(let path of blacklistPaths) {
                 if(req.path.includes(path) || decodeURI(req.path).includes(path)) {
-                    found = true;
-                    break;
+                    res.status(404).render("http-error", {
+                        http_code: "404",
+                        http_message: "Not Found",
+                        error_message: "Blacklisted Path",
+                    });
+                    return;
                 }
             }
-            if(!found) {
-                res.status(404).render("http-error", {
-                    http_code: "404",
-                    http_message: "Not Found",
-                    error_message: "Path not whitelisted",
-                });
-                return;
+            // if the whitelist is not empty and the path doesn't contain a whitelisted path, return a 404
+            if(whitelistPaths.length > 0) {
+                let found = false;
+                for(let path of whitelistPaths) {
+                    if(req.path.includes(path) || decodeURI(req.path).includes(path)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found) {
+                    res.status(404).render("http-error", {
+                        http_code: "404",
+                        http_message: "Not Found",
+                        error_message: "Path not whitelisted",
+                    });
+                    return;
+                }
             }
+            next();
+        } catch(e: any) {
+            console.log("Error checking whitelist/blacklist");
+            console.log(e.message);
+            res.status(500).render("http-error", {
+                http_code: "500",
+                http_message: "Internal Server Error",
+                error_message: e.message,
+            });
         }
-        next();
+        
     });
     app.use(Express.json());
     app.use(Express.urlencoded({ extended: true }));
@@ -120,8 +132,7 @@ async function main() {
         if (path.endsWith("/")) {
             path += "index.html";
         }
-        let filePath = `./public${path}`;
-        //console.log(filePath);
+        let filePath = nodePath.join("public", path);
         if (fs.existsSync(filePath)) {
             res.sendFile(filePath, {root: process.cwd()});
         } else {

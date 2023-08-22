@@ -6,7 +6,8 @@ ENV NODE_ENV=production
 RUN apt update && apt install -y \
     nginx
 
-COPY nginx/staticproxy.conf /etc/nginx/conf.d/staticproxy.conf
+COPY ./docker/nginx/staticproxy.conf /etc/nginx/conf.d/staticproxy.conf
+COPY ./docker/start.sh /start.sh
 
 WORKDIR /app
 
@@ -16,5 +17,5 @@ RUN npm install --production
 
 COPY . .
 
-CMD service nginx start && npm start
+CMD ["/start.sh"]
 
