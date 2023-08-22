@@ -3,6 +3,8 @@ This is a service that generates a static copy of a website locally, and serves 
 
 Secure dynamic backends such as Wordpress from direct attacks with a controlled static version served to your clients.
 
+- Get it on [Docker Hub](https://hub.docker.com/r/sineware/static-proxy)
+
 ## Environement
 ```bash
 API_KEY=abc123 # API Key to access /sw-api/refresh endpoint (Authorization header with "Bearer <token>")
