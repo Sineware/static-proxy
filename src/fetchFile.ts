@@ -26,6 +26,7 @@ export async function fetchFile(path: string) {
                 responseType: 'arraybuffer', 
                 headers: {
                     "Host": new URL(upstream).host,
+                    "X-FORWARDED-PROTO": "https",
                 }
             }
         );

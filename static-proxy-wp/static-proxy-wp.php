@@ -3,7 +3,7 @@
  * Plugin Name:       Sineware Static Proxy Integration
  * Plugin URI:        https://github.com/Sineware/static-proxy
  * Description:       Calls the Static Proxy refresh endpoint when the WordPress site is updated.
- * Version:           1.1.2
+ * Version:           1.1.3
  * Requires at least: 5.2
  * Requires PHP:      7.2
  * Author:            Seshan Ravikumar
@@ -16,6 +16,7 @@ function swsp_refresh() {
     $url = get_option( 'swsp_post_url' );
     $api_key = get_option( 'swsp_api_key' );
     $response = wp_remote_post( $url, array(
+        'blocking' => false,
         'method'      => 'POST',
         'headers' => array(
             'Authorization' => 'Bearer ' . $api_key
